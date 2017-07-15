@@ -1,21 +1,45 @@
+import csv
 import numpy as np
 import matplotlib.pyplot as plot
-from sklearn import svm, datasets
+from sklearn import svm
 import datetime
 import psutil
 import os
 
-
-
 start = datetime.datetime.now()
 
-iris = datasets.load_iris()
+X = []
+y = []
 
-X = iris.data[:, :2]
-y = iris.target
+with open('input.csv') as csvfile:
+    readCSV = csv.reader(csvfile, delimiter=',')
+    for row in readCSV:
+        tempX = []
+        try:
+            X0 = float(row[0])
+            X1 = float(row[1])
+            y0 = int(row[2])
+        except ValueError as v:
+            print("Ignored value", row)
 
-print(type(y))
-print(y)
+
+        if isinstance(X0, float):
+            tempX.append(X0)
+        else:
+            continue
+        if isinstance(X1, float):
+            tempX.append(X1)
+        else:
+            continue
+        if isinstance(y0, int):
+            X.append(tempX)
+            y.append(y0)
+        else:
+            continue
+
+X = np.array(X)
+y = np.array(y)
+
 h = .02
 
 C = 1.0
@@ -50,17 +74,28 @@ plot.ylim(yy.min(), yy.max())
 plot.xticks(())
 plot.yticks(())
 
+array = []
+
+for index in range(len(X)):
+    temp = X[index].tolist()
+    temp.append(y[index])
+    array.append(temp)
+
+
+csvFileObj = open('output.csv', 'w', newline='')
+csvWriter = csv.writer(csvFileObj)
+for row in array:
+    csvWriter.writerow(row)
+csvFileObj.close()
+
 end = datetime.datetime.now()
 
-print("Processing Time ", end-start)
+print("Processing Time: ", end-start)
 pid = os.getpid()
 py = psutil.Process(pid)
-memoryUse = py.memory_info()[0]/2.**30  # memory use in GB...I think
+memoryUse = py.memory_info()[0]/2.**30
 print('CPU Utilization: ', memoryUse)
-print('CPU Utilization percentage ', psutil.cpu_percent())
-print('CPU virtual memory usage ', psutil.virtual_memory()) #  physical memory usage
+print('CPU Utilization percentage: ', psutil.cpu_percent())
+print('CPU virtual memory usage: ', psutil.virtual_memory())
 
 plot.show()
-
-
-
